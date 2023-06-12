@@ -10,3 +10,16 @@ All image formats are backed by an accompanying color model.
 * NRGBAF32 - Color and RGB image with _ordinary alpha_ (non premultiplied). All channels are encoded as a 32 bit float value (per pixel).
 * RGBAF64 - Color and RGB image with _premultiplied alpha_. All channels are encoded as a 64 bit float value (per pixel).
 * RGBAF32 - Color and RGB image with _premultiplied alpha_. All channels are encoded as a 32 bit float value (per pixel).
+
+== License
+
+https://creativecommons.org/publicdomain/zero/1.0/[CC0 - Creative Commons 0 (v1.0)]
+
+image::http://mirrors.creativecommons.org/presskit/buttons/80x15/png/cc-zero.png[CC0]
+
+== Dependencies
+
+Nope. No exotic dependencies to mention.
+
+This library applies to the vanilla images as provided by the standard go library `image`.
+
