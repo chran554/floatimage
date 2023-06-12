@@ -1,0 +1,10 @@
+= floatimage
+
+This is image implementations based on float64 and float32 values for image channels RGBA.
+
+Images are RGB with alpha or premultiplied alpha.
+
+* NRGBAF64 - RGB image with _ordinary alpha_ (non premultiplied). All channels are encoded as a 64 bit float value (per pixel).
+* NRGBAF32 - RGB image with _ordinary alpha_ (non premultiplied). All channels are encoded as a 32 bit float value (per pixel).
+* RGBAF64 - RGB image with _premultiplied alpha_. All channels are encoded as a 64 bit float value (per pixel).
+* RGBAF32 - RGB image with _premultiplied alpha_. All channels are encoded as a 32 bit float value (per pixel).
