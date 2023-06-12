@@ -7,28 +7,28 @@ import (
 	"testing"
 )
 
-func TestRGBAF64(t *testing.T) {
-	rgbaf64 := NewRGBAF64(image.Rectangle{Min: image.Point{X: 0, Y: 0}, Max: image.Point{X: 100, Y: 100}})
+func TestRGBAF32(t *testing.T) {
+	rgbaf32 := NewRGBAF32(image.Rectangle{Min: image.Point{X: 0, Y: 0}, Max: image.Point{X: 100, Y: 100}})
 
-	width := rgbaf64.Bounds().Dx()
-	height := rgbaf64.Bounds().Dy()
-	diagonalMax := math.Sqrt(float64(width*width + height*height))
+	width := rgbaf32.Bounds().Dx()
+	height := rgbaf32.Bounds().Dy()
+	diagonalMax := float32(math.Sqrt(float64(width*width + height*height)))
 
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-			diagonal := math.Sqrt(float64(x*x + y*y))
+			diagonal := float32(math.Sqrt(float64(x*x + y*y)))
 
 			alpha := diagonal / diagonalMax
-			c := floatcolor.RGBAF64{
-				R: alpha * float64(x) / float64(width),
-				G: alpha * float64(y) / float64(height),
+			c := floatcolor.RGBAF32{
+				R: alpha * float32(x) / float32(width),
+				G: alpha * float32(y) / float32(height),
 				B: alpha * diagonal / diagonalMax,
 				A: alpha,
 			}
 
-			rgbaf64.Set(x+rgbaf64.Bounds().Min.X, y+rgbaf64.Bounds().Min.Y, c)
+			rgbaf32.Set(x+rgbaf32.Bounds().Min.X, y+rgbaf32.Bounds().Min.Y, c)
 		}
 	}
 
-	writeImage("NRGBAF64.png", rgbaf64)
+	writeImage("../testresult/RGBAF32.png", rgbaf32)
 }

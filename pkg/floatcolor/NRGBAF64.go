@@ -4,80 +4,74 @@ import "image/color"
 
 type NRGBAF64 struct {
 	R, G, B, A float64
-}
-
-type NRGBAF32 struct {
-	R, G, B, A float32
-}
-
-type RGBAF64 struct {
-	R, G, B, A float64
-}
-
-type RGBAF32 struct {
-	R, G, B, A float32
+	Precise    bool
 }
 
 var (
 	NRGBAF64Model = color.ModelFunc(nrgbaf64Model)
-	NRGBAF32Model = color.ModelFunc(nrgbaf32Model)
-	RGBAF64Model  = color.ModelFunc(rgbaf64Model)
-	RGBAF32Model  = color.ModelFunc(rgbaf32Model)
 )
 
 func (nrgbaf64 NRGBAF64) RGBA() (r, g, b, a uint32) {
 	conv := nrgbaf64.A * 0xffff
-	return uint32(clampF64(nrgbaf64.R*conv, 0.0, 0xffff)),
-		uint32(clampF64(nrgbaf64.G*conv, 0.0, 0xffff)),
-		uint32(clampF64(nrgbaf64.B*conv, 0.0, 0xffff)),
-		uint32(clampF64(nrgbaf64.A*0xffff, 0.0, 0xffff))
+	return uint32(clampF64(nrgbaf64.R*conv, 0x0000, 0xffff, nrgbaf64.Precise)),
+		uint32(clampF64(nrgbaf64.G*conv, 0x0000, 0xffff, nrgbaf64.Precise)),
+		uint32(clampF64(nrgbaf64.B*conv, 0x0000, 0xffff, nrgbaf64.Precise)),
+		uint32(clampF64(nrgbaf64.A*0xffff, 0x0000, 0xffff, nrgbaf64.Precise))
 }
 
-func (nrgbaf32 NRGBAF32) RGBA() (r, g, b, a uint32) {
-	conv := nrgbaf32.A * 0xffff
-	return uint32(clampF32(nrgbaf32.R*conv, 0.0, 0xffff)),
-		uint32(clampF32(nrgbaf32.G*conv, 0.0, 0xffff)),
-		uint32(clampF32(nrgbaf32.B*conv, 0.0, 0xffff)),
-		uint32(clampF32(nrgbaf32.A*0xffff, 0.0, 0xffff))
+// Add adds the RGB values to the color making it brighter.
+// No clamping of the RGB components is made.
+// Result for each component may be outside the [0.0, 1.0] range.
+// Alpha value is not affected.
+func (nrgbaf64 *NRGBAF64) Add(c color.Color) {
+	c2 := NRGBAF64Model.Convert(c).(NRGBAF64)
+
+	nrgbaf64.R += c2.R
+	nrgbaf64.G += c2.G
+	nrgbaf64.B += c2.B
 }
 
-func (rgbaf64 RGBAF64) RGBA() (r, g, b, a uint32) {
-	return uint32(clampF64(rgbaf64.R*0xffff, 0.0, 0xffff)),
-		uint32(clampF64(rgbaf64.G*0xffff, 0.0, 0xffff)),
-		uint32(clampF64(rgbaf64.B*0xffff, 0.0, 0xffff)),
-		uint32(clampF64(rgbaf64.A*0xffff, 0.0, 0xffff))
+// Sub subtracts the RGB values to the color making it darker.
+// No clamping of the RGB components is made.
+// Result for each component may be outside the [0.0, 1.0] range.
+// Alpha value is not affected.
+func (nrgbaf64 *NRGBAF64) Sub(c color.Color) {
+	c2 := NRGBAF64Model.Convert(c).(NRGBAF64)
+
+	nrgbaf64.R -= c2.R
+	nrgbaf64.G -= c2.G
+	nrgbaf64.B -= c2.B
 }
 
-func (rgbaf32 RGBAF32) RGBA() (r, g, b, a uint32) {
-	return uint32(clampF32(rgbaf32.R*0xffff, 0.0, 0xffff)),
-		uint32(clampF32(rgbaf32.G*0xffff, 0.0, 0xffff)),
-		uint32(clampF32(rgbaf32.B*0xffff, 0.0, 0xffff)),
-		uint32(clampF32(rgbaf32.A*0xffff, 0.0, 0xffff))
-}
+// Mul multiplies the RGB values to the color.
+// No clamping of the result of the RGB components is made.
+// Result for each component may be outside the [0.0, 1.0] range.
+// Alpha value is not affected.
+func (nrgbaf64 *NRGBAF64) Mul(c color.Color) {
+	c2 := NRGBAF64Model.Convert(c).(NRGBAF64)
 
-func clampF32(v float32, min float32, max float32) float32 {
-	if v > max {
-		return max
-	} else if v < min {
-		return min
-	} else {
-		return v
-	}
-}
-
-func clampF64(v float64, min float64, max float64) float64 {
-	if v > max {
-		return max
-	} else if v < min {
-		return min
-	} else {
-		return v
-	}
+	nrgbaf64.R *= c2.R
+	nrgbaf64.G *= c2.G
+	nrgbaf64.B *= c2.B
 }
 
 func nrgbaf64Model(c color.Color) color.Color {
 	if _, ok := c.(NRGBAF64); ok {
 		return c
+	}
+
+	if nrgbaf, ok := c.(NRGBAF32); ok {
+		return NRGBAF64{R: float64(nrgbaf.R), G: float64(nrgbaf.G), B: float64(nrgbaf.B), A: float64(nrgbaf.A)}
+	}
+
+	if rgbaf, ok := c.(RGBAF64); ok {
+		conv := 1.0 / rgbaf.A
+		return NRGBAF64{R: rgbaf.R * conv, G: rgbaf.G * conv, B: rgbaf.B * conv, A: rgbaf.A}
+	}
+
+	if rgbaf, ok := c.(RGBAF32); ok {
+		conv := 1.0 / rgbaf.A
+		return NRGBAF64{R: float64(rgbaf.R * conv), G: float64(rgbaf.G * conv), B: float64(rgbaf.B * conv), A: float64(rgbaf.A)}
 	}
 
 	if nrgba, ok := c.(color.NRGBA); ok {
@@ -103,62 +97,4 @@ func nrgbaf64Model(c color.Color) color.Color {
 	// Since Color.RGBA returns an alpha-premultiplied color, we should have r <= a && g <= a && b <= a.
 	conv := float64(a) / (0xffff * 0xffff) // (1.0 / 0xffff) * (float64(a) / 0xffff)
 	return NRGBAF64{R: float64(r) * conv, G: float64(g) * conv, B: float64(b) * conv, A: float64(a) / 0xffff}
-}
-
-func nrgbaf32Model(c color.Color) color.Color {
-	if _, ok := c.(NRGBAF32); ok {
-		return c
-	}
-
-	if nrgba, ok := c.(color.NRGBA); ok {
-		conv := float32(1.0 / 0xff)
-		return NRGBAF32{R: float32(nrgba.R) * conv, G: float32(nrgba.G) * conv, B: float32(nrgba.B) * conv, A: float32(nrgba.A) * conv}
-	}
-
-	r, g, b, a := c.RGBA()
-	if a == 0xffff {
-		conv := float32(1.0 / 0xffff)
-		return NRGBAF32{R: float32(r) * conv, G: float32(g) * conv, B: float32(b) * conv, A: 1.0}
-	}
-	if a == 0 {
-		return NRGBAF32{R: 0.0, G: 0.0, B: 0.0, A: 0.0}
-	}
-
-	// Since Color.RGBA returns an alpha-premultiplied color, we should have r <= a && g <= a && b <= a.
-	conv := float32(a) / (0xffff * 0xffff) // (1.0 / 0xffff) * (float64(a) / 0xffff)
-	return NRGBAF32{R: float32(r) * conv, G: float32(g) * conv, B: float32(b) * conv, A: float32(a) / 0xffff}
-}
-
-func rgbaf64Model(c color.Color) color.Color {
-	if _, ok := c.(RGBAF64); ok {
-		return c
-	}
-	r, g, b, a := c.RGBA()
-	if a == 0xffff {
-		conv := 1.0 / 0xffff
-		return RGBAF64{R: float64(r) * conv, G: float64(g) * conv, B: float64(b) * conv, A: 1.0}
-	}
-	if a == 0 {
-		return RGBAF64{R: 0.0, G: 0.0, B: 0.0, A: 0.0}
-	}
-
-	conv := 1.0 / 0xffff
-	return RGBAF64{R: float64(r) * conv, G: float64(g) * conv, B: float64(b) * conv, A: float64(a) * conv}
-}
-
-func rgbaf32Model(c color.Color) color.Color {
-	if _, ok := c.(RGBAF32); ok {
-		return c
-	}
-	r, g, b, a := c.RGBA()
-	if a == 0xffff {
-		conv := float32(1.0 / 0xffff)
-		return RGBAF32{R: float32(r) * conv, G: float32(g) * conv, B: float32(b) * conv, A: 1.0}
-	}
-	if a == 0 {
-		return RGBAF32{R: 0.0, G: 0.0, B: 0.0, A: 0.0}
-	}
-
-	conv := float32(1.0 / 0xffff)
-	return RGBAF32{R: float32(r) * conv, G: float32(g) * conv, B: float32(b) * conv, A: float32(a) * conv}
 }
