@@ -23,3 +23,17 @@ Nope. No exotic dependencies to mention.
 
 This library applies to the vanilla images as provided by the standard go library `image`.
 
+== Example
+
+Have look at the test example that renders a float image with float RGBA values in the range [0.0, 1.0] and then saves it as a common image.Image.
+
+https://github.com/chran554/floatimage/blob/master/pkg/floatimage/NRGBAF64_test.go
+
+== TODO
+
+* A common FloatColor interface with functions for add, sub and mul
+* NewXXX functions for both float colors and float images.
+* A "min-max range" for float colors and for float images.
+** Function to check if all values are in valid range both for float color and for float image.
+** Function to clamp all values both in float color but also in float image
+** RGBA() conversion functions should be based on the min-max range and not [0.0, 1.0]
