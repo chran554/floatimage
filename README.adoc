@@ -17,6 +17,8 @@ https://creativecommons.org/publicdomain/zero/1.0/[CC0 - Creative Commons 0 (v1.
 
 image::http://mirrors.creativecommons.org/presskit/buttons/80x15/png/cc-zero.png[CC0]
 
+It is not a requirement by the license, but if you do improve the code then any feedback or pull request is very appreciated. Sharing is caring.
+
 == Dependencies
 
 Nope. No exotic dependencies to mention.

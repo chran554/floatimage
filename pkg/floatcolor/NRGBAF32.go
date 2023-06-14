@@ -19,40 +19,36 @@ func (nrgbaf32 NRGBAF32) RGBA() (r, g, b, a uint32) {
 		uint32(clampF32(nrgbaf32.A*0xffff, 0.0, 0xffff, nrgbaf32.Precise))
 }
 
-// Add adds the RGB values to the color making it brighter.
-// No clamping of the RGB components is made.
-// Result for each component may be outside the [0.0, 1.0] range.
-// Alpha value is not affected.
-func (nrgbaf32 *NRGBAF32) Add(c color.Color) {
-	c2 := NRGBAF32Model.Convert(c).(NRGBAF32)
-
-	nrgbaf32.R += c2.R
-	nrgbaf32.G += c2.G
-	nrgbaf32.B += c2.B
+// Mix smoothly mixes the RGB values of two color into one resulting color.
+// Parameter mix determine how much percent of color c2 is in the resulting mixed color.
+// Mix value range is [0.0, 1.0] where the resulting mix of 0.0 gives same color as c1
+// and a mix of 1.0 gives same color as c2.
+// Alpha value is affected.
+func (nrgbaf32 *NRGBAF32) Mix(c1 color.Color, mixAmount float64) color.Color {
+	cc1 := NRGBAF64Model.Convert(c1).(NRGBAF64)
+	return mix(nrgbaf32, cc1, mixAmount)
 }
 
-// Sub subtracts the RGB values to the color making it darker.
-// No clamping of the RGB components is made.
-// Result for each component may be outside the [0.0, 1.0] range.
-// Alpha value is not affected.
-func (nrgbaf32 *NRGBAF32) Sub(c color.Color) {
-	c2 := NRGBAF32Model.Convert(c).(NRGBAF32)
-
-	nrgbaf32.R -= c2.R
-	nrgbaf32.G -= c2.G
-	nrgbaf32.B -= c2.B
+func (nrgbaf32 *NRGBAF32) SetAlpha(alpha float32) {
+	nrgbaf32.A = alpha
 }
 
-// Mul multiplies the RGB values to the color.
-// No clamping of the result of the RGB components is made.
-// Result for each component may be outside the [0.0, 1.0] range.
-// Alpha value is not affected.
-func (nrgbaf32 *NRGBAF32) Mul(c color.Color) {
-	c2 := NRGBAF32Model.Convert(c).(NRGBAF32)
+func (nrgbaf32 *NRGBAF32) SetRGB(red float32, green float32, blue float32) {
+	nrgbaf32.SetR(red)
+	nrgbaf32.SetG(green)
+	nrgbaf32.SetB(blue)
+}
 
-	nrgbaf32.R *= c2.R
-	nrgbaf32.G *= c2.G
-	nrgbaf32.B *= c2.B
+func (nrgbaf32 *NRGBAF32) SetR(red float32) {
+	nrgbaf32.R = red
+}
+
+func (nrgbaf32 *NRGBAF32) SetG(green float32) {
+	nrgbaf32.G = green
+}
+
+func (nrgbaf32 *NRGBAF32) SetB(blue float32) {
+	nrgbaf32.B = blue
 }
 
 func nrgbaf32Model(c color.Color) color.Color {

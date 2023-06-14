@@ -10,7 +10,7 @@ import (
 type NRGBAF32 struct {
 	// Pix holds the image's pixels, in R, G, B, A order and big-endian format.
 	// The pixel at (x, y) starts at Pix[(y-Rect.Min.Y)*Stride + (x-Rect.Min.X)*8].
-	Pix []float64
+	Pix []float32
 	// Stride is the Pix stride (in bytes) between vertically adjacent pixels.
 	Stride int
 	// Rect is the image's bounds.
@@ -29,7 +29,7 @@ func (p *NRGBAF32) At(x, y int) color.Color {
 	i := p.PixOffset(x, y)
 	s := p.Pix[i : i+4 : i+4] // Small cap improves performance, see https://golang.org/issue/27857
 
-	return floatcolor.NRGBAF64{R: s[0], G: s[1], B: s[2], A: s[3], Precise: p.Precise}
+	return floatcolor.NRGBAF32{R: s[0], G: s[1], B: s[2], A: s[3], Precise: p.Precise}
 }
 
 func (p *NRGBAF32) RGBA64At(x, y int) color.RGBA64 {
@@ -39,10 +39,10 @@ func (p *NRGBAF32) RGBA64At(x, y int) color.RGBA64 {
 	i := p.PixOffset(x, y)
 	s := p.Pix[i : i+4 : i+4] // Small cap improves performance, see https://golang.org/issue/27857
 
-	r := uint16(clampF64(s[0]*0xffff*s[3], 0x0000, 0xffff, p.Precise))
-	g := uint16(clampF64(s[1]*0xffff*s[3], 0x0000, 0xffff, p.Precise))
-	b := uint16(clampF64(s[2]*0xffff*s[3], 0x0000, 0xffff, p.Precise))
-	a := uint16(clampF64(s[3]*0xffff, 0x0000, 0xffff, p.Precise))
+	r := uint16(clampF32(s[0]*0xffff*s[3], 0x0000, 0xffff, p.Precise))
+	g := uint16(clampF32(s[1]*0xffff*s[3], 0x0000, 0xffff, p.Precise))
+	b := uint16(clampF32(s[2]*0xffff*s[3], 0x0000, 0xffff, p.Precise))
+	a := uint16(clampF32(s[3]*0xffff, 0x0000, 0xffff, p.Precise))
 
 	return color.RGBA64{R: r, G: g, B: b, A: a}
 }
@@ -57,7 +57,7 @@ func (p *NRGBAF32) Set(x, y int, c color.Color) {
 	if !(image.Point{X: x, Y: y}.In(p.Rect)) {
 		return
 	}
-	c1 := floatcolor.NRGBAF64Model.Convert(c).(floatcolor.NRGBAF64)
+	c1 := floatcolor.NRGBAF32Model.Convert(c).(floatcolor.NRGBAF32)
 
 	i := p.PixOffset(x, y)
 	s := p.Pix[i : i+4 : i+4] // Small cap improves performance, see https://golang.org/issue/27857
@@ -72,7 +72,7 @@ func (p *NRGBAF32) SetRGBA64(x, y int, c color.RGBA64) {
 	if !(image.Point{X: x, Y: y}.In(p.Rect)) {
 		return
 	}
-	c1 := floatcolor.NRGBAF64Model.Convert(c).(floatcolor.NRGBAF64)
+	c1 := floatcolor.NRGBAF32Model.Convert(c).(floatcolor.NRGBAF32)
 
 	i := p.PixOffset(x, y)
 	s := p.Pix[i : i+4 : i+4] // Small cap improves performance, see https://golang.org/issue/27857
@@ -94,7 +94,7 @@ func (p *NRGBAF32) SubImage(r image.Rectangle) image.Image {
 		return &NRGBAF64{}
 	}
 	i := p.PixOffset(r.Min.X, r.Min.Y)
-	return &NRGBAF64{
+	return &NRGBAF32{
 		Pix:     p.Pix[i:],
 		Stride:  p.Stride,
 		Rect:    r,
@@ -126,7 +126,7 @@ func NewNRGBAF32(r image.Rectangle) *NRGBAF32 {
 	const channels = 4
 
 	return &NRGBAF32{
-		Pix:     make([]float64, pixelBufferLength(channels, r, "NRGBAF32")),
+		Pix:     make([]float32, pixelBufferLength(channels, r, "NRGBAF32")),
 		Stride:  channels * r.Dx(),
 		Rect:    r,
 		Precise: false,
