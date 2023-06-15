@@ -3,6 +3,8 @@ package floatcolor
 import "image/color"
 
 type Float64Color interface {
+	SetPrecise(bool)
+
 	// Mix smoothly mixes the RGB values of two color into one resulting color.
 	// Parameter mix determine how much percent of color c2 is in the resulting mixed color.
 	// Mix value range is [0.0, 1.0] where the resulting mix of 0.0 gives same color as c1

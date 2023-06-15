@@ -18,6 +18,27 @@ type RGBAF64 struct {
 	Precise bool
 }
 
+// NewRGBAF64 returns a new RGBAF64 image with the given dimensions.
+// An RGBAF64 image is an RGB image with premultiplied alpha
+// where the red, green, blue, and alpha values are float64 values in the typical range [0.0, 1.0].
+func NewRGBAF64(width, height int) *RGBAF64 {
+	return NewRGBAF64WithBounds(0, 0, width, height)
+}
+
+// NewRGBAF64WithBounds returns a new RGBAF64 image with the given bounds.
+// An RGBAF64 image is an RGB image with premultiplied alpha
+// where the red, green, blue, and alpha values are float64 values in the typical range [0.0, 1.0].
+func NewRGBAF64WithBounds(x0, y0, x1, y1 int) *RGBAF64 {
+	r := image.Rect(x0, y0, x1, y1)
+	const channels = 4
+	return &RGBAF64{
+		Pix:     make([]float64, pixelBufferLength(channels, r, "RGBAF64")),
+		Stride:  channels * r.Dx(),
+		Rect:    r,
+		Precise: false,
+	}
+}
+
 func (p *RGBAF64) ColorModel() color.Model { return floatcolor.RGBAF64Model }
 
 func (p *RGBAF64) Bounds() image.Rectangle { return p.Rect }
@@ -119,15 +140,4 @@ func (p *RGBAF64) Opaque() bool {
 	}
 
 	return true
-}
-
-// NewRGBAF64 returns a new RGBAF64 image with the given bounds.
-func NewRGBAF64(r image.Rectangle) *RGBAF64 {
-	const channels = 4
-	return &RGBAF64{
-		Pix:     make([]float64, pixelBufferLength(channels, r, "RGBAF64")),
-		Stride:  channels * r.Dx(),
-		Rect:    r,
-		Precise: false,
-	}
 }

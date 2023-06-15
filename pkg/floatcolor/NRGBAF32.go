@@ -11,12 +11,31 @@ var (
 	NRGBAF32Model = color.ModelFunc(nrgbaf32Model)
 )
 
+// NewNRGBAF32 creates a new NRGBAF32 color.
+// It is not set to "precise".
+// Red, green, and blue are supposed to be using ordinary (non premultiplied) alpha.
+func NewNRGBAF32(red, green, blue, alpha float32) NRGBAF32 {
+	return NRGBAF32{R: red, G: green, B: blue, A: alpha, Precise: false}
+}
+
+// NewNRGBAF32PremultipliedAlpha creates a new NRGBAF32 color.
+// It is not set to "precise".
+// Red, green, and blue are supposed to be already premultiplied with alpha.
+func NewNRGBAF32PremultipliedAlpha(red, green, blue, alpha float32) NRGBAF32 {
+	rgbaf32 := NewRGBAF32(red, green, blue, alpha)
+	return NRGBAF32Model.Convert(rgbaf32).(NRGBAF32)
+}
+
 func (nrgbaf32 NRGBAF32) RGBA() (r, g, b, a uint32) {
 	conv := nrgbaf32.A * 0xffff
 	return uint32(clampF32(nrgbaf32.R*conv, 0.0, 0xffff, nrgbaf32.Precise)),
 		uint32(clampF32(nrgbaf32.G*conv, 0.0, 0xffff, nrgbaf32.Precise)),
 		uint32(clampF32(nrgbaf32.B*conv, 0.0, 0xffff, nrgbaf32.Precise)),
 		uint32(clampF32(nrgbaf32.A*0xffff, 0.0, 0xffff, nrgbaf32.Precise))
+}
+
+func (nrgbaf32 *NRGBAF32) SetPrecise(usePreciseCalculation bool) {
+	nrgbaf32.Precise = usePreciseCalculation
 }
 
 // Mix smoothly mixes the RGB values of two color into one resulting color.

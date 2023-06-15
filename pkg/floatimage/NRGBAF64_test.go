@@ -2,13 +2,12 @@ package floatimage
 
 import (
 	"floatimage/pkg/floatcolor"
-	"image"
 	"math"
 	"testing"
 )
 
 func TestNRGBAF64(t *testing.T) {
-	nrgbaf64 := NewNRGBAF64(image.Rectangle{Min: image.Point{X: 0, Y: 0}, Max: image.Point{X: 100, Y: 100}})
+	nrgbaf64 := NewNRGBAF64(100, 100)
 
 	width := nrgbaf64.Bounds().Dx()
 	height := nrgbaf64.Bounds().Dy()

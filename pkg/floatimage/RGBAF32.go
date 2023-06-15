@@ -18,6 +18,27 @@ type RGBAF32 struct {
 	Precise bool
 }
 
+// NewRGBAF32 returns a new RGBAF32 image with the given dimensions.
+// An RGBAF32 image is an RGB image with premultiplied alpha
+// where the red, green, blue, and alpha values are float32 values in the typical range [0.0, 1.0].
+func NewRGBAF32(width, height int) *RGBAF32 {
+	return NewRGBAF32WithBounds(0, 0, width, height)
+}
+
+// NewRGBAF32WithBounds returns a new RGBAF32 image with the given bounds.
+// An RGBAF32 image is an RGB image with premultiplied alpha
+// where the red, green, blue, and alpha values are float32 values in the typical range [0.0, 1.0].
+func NewRGBAF32WithBounds(x0, y0, x1, y1 int) *RGBAF32 {
+	r := image.Rect(x0, y0, x1, y1)
+	const channels = 4
+	return &RGBAF32{
+		Pix:     make([]float32, pixelBufferLength(channels, r, "RGBAF32")),
+		Stride:  channels * r.Dx(),
+		Rect:    r,
+		Precise: false,
+	}
+}
+
 func (p *RGBAF32) ColorModel() color.Model { return floatcolor.RGBAF32Model }
 
 func (p *RGBAF32) Bounds() image.Rectangle { return p.Rect }
@@ -119,15 +140,4 @@ func (p *RGBAF32) Opaque() bool {
 	}
 
 	return true
-}
-
-// NewRGBAF32 returns a new RGBAF32 image with the given bounds.
-func NewRGBAF32(r image.Rectangle) *RGBAF32 {
-	const channels = 4
-	return &RGBAF32{
-		Pix:     make([]float32, pixelBufferLength(channels, r, "RGBAF32")),
-		Stride:  channels * r.Dx(),
-		Rect:    r,
-		Precise: false,
-	}
 }

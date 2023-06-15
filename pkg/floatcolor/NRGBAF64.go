@@ -11,12 +11,31 @@ var (
 	NRGBAF64Model = color.ModelFunc(nrgbaf64Model)
 )
 
+// NewNRGBAF64 creates a new NRGBAF64 color.
+// It is not set to "precise".
+// Red, green, and blue are supposed to be using ordinary (non premultiplied) alpha.
+func NewNRGBAF64(red, green, blue, alpha float64) NRGBAF64 {
+	return NRGBAF64{R: red, G: green, B: blue, A: alpha, Precise: false}
+}
+
+// NewNRGBAF64PremultipliedAlpha creates a new NRGBAF64 color.
+// It is not set to "precise".
+// Red, green, and blue are supposed to be already premultiplied with alpha.
+func NewNRGBAF64PremultipliedAlpha(red, green, blue, alpha float64) NRGBAF64 {
+	rgbaf64 := NewRGBAF64(red, green, blue, alpha)
+	return NRGBAF64Model.Convert(rgbaf64).(NRGBAF64)
+}
+
 func (nrgbaf64 NRGBAF64) RGBA() (r, g, b, a uint32) {
 	conv := nrgbaf64.A * 0xffff
 	return uint32(clampF64(nrgbaf64.R*conv, 0x0000, 0xffff, nrgbaf64.Precise)),
 		uint32(clampF64(nrgbaf64.G*conv, 0x0000, 0xffff, nrgbaf64.Precise)),
 		uint32(clampF64(nrgbaf64.B*conv, 0x0000, 0xffff, nrgbaf64.Precise)),
 		uint32(clampF64(nrgbaf64.A*0xffff, 0x0000, 0xffff, nrgbaf64.Precise))
+}
+
+func (nrgbaf64 *NRGBAF64) SetPrecise(usePreciseCalculation bool) {
+	nrgbaf64.Precise = usePreciseCalculation
 }
 
 // Mix smoothly mixes the RGB values of two color into one resulting color.

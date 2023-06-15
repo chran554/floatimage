@@ -2,13 +2,12 @@ package floatimage
 
 import (
 	"floatimage/pkg/floatcolor"
-	"image"
 	"math"
 	"testing"
 )
 
 func TestRGBAF64(t *testing.T) {
-	rgbaf64 := NewRGBAF64(image.Rectangle{Min: image.Point{X: 0, Y: 0}, Max: image.Point{X: 100, Y: 100}})
+	rgbaf64 := NewRGBAF64(100, 100)
 
 	width := rgbaf64.Bounds().Dx()
 	height := rgbaf64.Bounds().Dy()

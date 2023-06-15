@@ -2,13 +2,12 @@ package floatimage
 
 import (
 	"floatimage/pkg/floatcolor"
-	"image"
 	"math"
 	"testing"
 )
 
 func TestRGBAF32(t *testing.T) {
-	rgbaf32 := NewRGBAF32(image.Rectangle{Min: image.Point{X: 0, Y: 0}, Max: image.Point{X: 100, Y: 100}})
+	rgbaf32 := NewRGBAF32(100, 100)
 
 	width := rgbaf32.Bounds().Dx()
 	height := rgbaf32.Bounds().Dy()
