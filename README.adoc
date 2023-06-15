@@ -32,7 +32,44 @@ Nope. No exotic dependencies to mention.
 
 Have look at the test example that renders a float image with float RGBA values in the range [0.0, 1.0] and then saves it as a common image.Image.
 
-https://github.com/chran554/floatimage/blob/master/pkg/floatimage/NRGBAF64_test.go
+```go
+package main
+
+import (
+  "floatimage/pkg/floatcolor"
+  "math"
+  "testing"
+)
+
+func main() {
+  nrgbaf64 := NewNRGBAF64(100, 100)
+
+  width := nrgbaf64.Bounds().Dx()
+  height := nrgbaf64.Bounds().Dy()
+  diagonalMax := math.Sqrt(float64(width*width + height*height))
+
+  for y := 0; y < height; y++ {
+    for x := 0; x < width; x++ {
+      diagonal := math.Sqrt(float64(x*x + y*y))
+
+      c := floatcolor.NRGBAF64{
+        R: float64(x) / float64(width),
+        G: float64(y) / float64(height),
+        B: diagonal / diagonalMax,
+        A: diagonal / diagonalMax,
+      }
+
+      px := x + nrgbaf64.Bounds().Min.X
+      py := y + nrgbaf64.Bounds().Min.Y
+      nrgbaf64.Set(px, py, c)
+    }
+  }
+
+  writeImage("NRGBAF64.png", nrgbaf64)
+  writeImage("NRGBAF64_as_NRGBA.png", nrgbaf64.AsNRGBA())
+  writeImage("NRGBAF64_as_RGBA.png", nrgbaf64.AsRGBA())
+}
+```
 
 == TODO
 
