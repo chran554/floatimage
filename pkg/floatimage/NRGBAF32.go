@@ -4,6 +4,7 @@ import (
 	"floatimage/pkg/floatcolor"
 	"image"
 	"image/color"
+	"image/draw"
 )
 
 // NRGBAF32 is an in-memory image whose At method returns floatcolor.NRGBAF32 values.
@@ -67,6 +68,58 @@ func (p *NRGBAF32) RGBA64At(x, y int) color.RGBA64 {
 	a := uint16(clampF32(s[3]*0xffff, 0x0000, 0xffff, p.Precise))
 
 	return color.RGBA64{R: r, G: g, B: b, A: a}
+}
+
+func (p *NRGBAF32) AsRGBA() *image.RGBA {
+	rgbaImage := image.NewRGBA(p.Rect)
+	convertNRGBAF32ToImage(p, rgbaImage, 0, 0, false, convColorNRGBAF32toRGBA)
+	return rgbaImage
+}
+
+func (p *NRGBAF32) AsNRGBA() *image.NRGBA {
+	nrgbaImage := image.NewNRGBA(p.Rect)
+	convertNRGBAF32ToImage(p, nrgbaImage, 0, 0, false, convColorNRGBAF32toNRGBA)
+	return nrgbaImage
+}
+
+func (p *NRGBAF32) AsRGBAForRange(min, max float64) *image.RGBA {
+	rgbaImage := image.NewRGBA(p.Rect)
+	convertNRGBAF32ToImage(p, rgbaImage, min, max, true, convColorNRGBAF32toRGBA)
+	return rgbaImage
+}
+
+func (p *NRGBAF32) AsNRGBAForRange(min, max float64) *image.NRGBA {
+	nrgbaImage := image.NewNRGBA(p.Rect)
+	convertNRGBAF32ToImage(p, nrgbaImage, min, max, true, convColorNRGBAF32toNRGBA)
+	return nrgbaImage
+}
+
+func convColorNRGBAF32toNRGBA(convertableColor floatcolor.ConvertableColor) color.Color {
+	return convertableColor.AsNRGBA()
+}
+
+func convColorNRGBAF32toRGBA(convertableColor floatcolor.ConvertableColor) color.Color {
+	return convertableColor.AsRGBA()
+}
+
+func convertNRGBAF32ToImage(source *NRGBAF32, destination draw.Image, min, max float64, useRange bool, convColorFunc func(convertableColor floatcolor.ConvertableColor) color.Color) {
+	if useRange && (min > max) {
+		min, max = max, min
+	}
+
+	for y := source.Rect.Min.Y; y < source.Rect.Max.Y; y++ {
+		for x := source.Rect.Min.X; x < source.Rect.Max.X; x++ {
+			c := source.At(x, y)
+			nrgbaf32c := c.(floatcolor.NRGBAF32)
+			f32c := c.(floatcolor.ConvertableColor)
+			if useRange {
+				nrgbaf32c.R = (nrgbaf32c.R - float32(min)) / float32(max-min)
+				nrgbaf32c.G = (nrgbaf32c.G - float32(min)) / float32(max-min)
+				nrgbaf32c.B = (nrgbaf32c.B - float32(min)) / float32(max-min)
+			}
+			destination.Set(x, y, convColorFunc(f32c))
+		}
+	}
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to the pixel at (x, y).

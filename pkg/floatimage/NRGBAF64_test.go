@@ -29,4 +29,6 @@ func TestNRGBAF64(t *testing.T) {
 	}
 
 	writeImage("../testresult/NRGBAF64.png", nrgbaf64)
+	writeImage("../testresult/NRGBAF64_as_NRGBA.png", nrgbaf64.AsNRGBA())
+	writeImage("../testresult/NRGBAF64_as_RGBA.png", nrgbaf64.AsRGBA())
 }

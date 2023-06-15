@@ -33,6 +33,26 @@ func (rgbaf64 RGBAF64) RGBA() (r, g, b, a uint32) {
 		uint32(clampF64(rgbaf64.A*0xffff, 0.0, 0xffff, rgbaf64.Precise))
 }
 
+func (rgbaf64 RGBAF64) AsNRGBA() color.NRGBA {
+	conv := 0xff / rgbaf64.A
+	return color.NRGBA{
+		R: uint8(clampF64(rgbaf64.R*conv, 0x00, 0xff, rgbaf64.Precise)),
+		G: uint8(clampF64(rgbaf64.G*conv, 0x00, 0xff, rgbaf64.Precise)),
+		B: uint8(clampF64(rgbaf64.B*conv, 0x00, 0xff, rgbaf64.Precise)),
+		A: uint8(clampF64(rgbaf64.A*0xff, 0x00, 0xff, rgbaf64.Precise)),
+	}
+}
+
+func (rgbaf64 RGBAF64) AsRGBA() color.RGBA {
+	const conv = float64(0xff)
+	return color.RGBA{
+		R: uint8(clampF64(rgbaf64.R*conv, 0x00, 0xff, rgbaf64.Precise)),
+		G: uint8(clampF64(rgbaf64.G*conv, 0x00, 0xff, rgbaf64.Precise)),
+		B: uint8(clampF64(rgbaf64.B*conv, 0x00, 0xff, rgbaf64.Precise)),
+		A: uint8(clampF64(rgbaf64.A*conv, 0x00, 0xff, rgbaf64.Precise)),
+	}
+}
+
 func (rgbaf64 *RGBAF64) SetPrecise(usePreciseCalculation bool) {
 	rgbaf64.Precise = usePreciseCalculation
 }

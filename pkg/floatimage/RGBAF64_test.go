@@ -30,4 +30,6 @@ func TestRGBAF64(t *testing.T) {
 	}
 
 	writeImage("../testresult/RGBAF64.png", rgbaf64)
+	writeImage("../testresult/RGBAF64_as_NRGBA.png", rgbaf64.AsNRGBA())
+	writeImage("../testresult/RGBAF64_as_RGBA.png", rgbaf64.AsRGBA())
 }

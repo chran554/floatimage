@@ -2,7 +2,12 @@
 
 This is image implementations based on float64 and float32 values for image channels RGBA.
 
-Images are RGB with alpha or premultiplied alpha channels. All channels are 64 or 32 bit float values. Expected value range for each channel is [0.0, 1.0]. Nothing stops the channel values to be outside the valid value interval but any call to the Color interface function `RGBA() (r, g, b, a uint32)` will clamp the values to the valid range.
+Images are common RGB with alpha or premultiplied alpha channels. All channels are 64 bit or 32 bit float values.
+
+This library implements float based images from scratch. They are fully compatible to those provided by the standard go library `image`. (Note: PNG image encoder will save these float images as 16bit/channel as these image types are not hardwired listed the PNG encoder as the standard image types.)
+
+Expected value range for each channel is [0.0, 1.0]. Nothing stops the channel values to be outside the valid value interval but any call to the Color interface function `RGBA() (r, g, b, a uint32)` will clamp the values to the valid range.
+The image writing encoders of golang will also assume values are in the expected range. If you use values outside the assumed range you may need to scale your values to a valid range before any drawing or writing image to disc.
 
 All image formats are backed by an accompanying color model.
 
@@ -23,8 +28,6 @@ It is not a requirement by the license, but if you do improve the code then any 
 
 Nope. No exotic dependencies to mention.
 
-This library applies to the vanilla images as provided by the standard go library `image`.
-
 == Example
 
 Have look at the test example that renders a float image with float RGBA values in the range [0.0, 1.0] and then saves it as a common image.Image.
@@ -33,9 +36,10 @@ https://github.com/chran554/floatimage/blob/master/pkg/floatimage/NRGBAF64_test.
 
 == TODO
 
-* A common FloatColor interface with functions for add, sub and mul
-* NewXXX functions for both float colors and float images.
-* A "min-max range" for float colors and for float images.
-** Function to check if all values are in valid range both for float color and for float image.
-** Function to clamp all values both in float color but also in float image
-** RGBA() conversion functions should be based on the min-max range and not [0.0, 1.0]
+* Function to check if all values are in valid normal range both for float color and for float image.
+* Function to clamp all values both in float color but also in float image to a range
+
+=== NOT TODO
+
+* Images and colors will never have a min-max-range associated with them to automatically be compatible with each other and to make any range valid for drawing and image encoding out of the box.
+It would be feasible to implement but at a computationally expensive price. And the images need their efficiency as there is already a lot of floats in there to calculate.
